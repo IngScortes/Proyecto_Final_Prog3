@@ -18,7 +18,7 @@ defmodule Sismo.Application do
     Supervisor.start_link(children, opts)
   end
 end
-# lib/sismo/application.ex
+
 defmodule Sismo.Application do
   use Application
 
@@ -30,12 +30,15 @@ defmodule Sismo.Application do
       {Registry, keys: :unique, name: Sismo.Registry},
       {Sismo.Persistence.Writer, []},
       {Sismo.Activity.Log, data_dir: data_dir},
-      {Sismo.Users.Server, data_dir: data_dir},
-      {Task.Supervisor, name: Sismo.TaskSupervisor}
-      # Fases siguientes: Zones.Server, CenterSupervisor, ShelterSupervisor,
-      # Needs.Server, People.Server, Pets.Server
+      {Task.Supervisor, name: Sismo.TaskSupervisor},
+      Sismo.Resources.CenterSupervisor,
+      {Sismo.Users.Server, data_dir: data_dir}
     ]
 
-    Supervisor.start_link(children, strategy: :rest_for_one, name: Sismo.Supervisor)
+    with {:ok, sup} <-
+           Supervisor.start_link(children, strategy: :rest_for_one, name: Sismo.Supervisor) do
+      Sismo.Resources.CenterSupervisor.restore_all(data_dir)
+      {:ok, sup}
+    end
   end
 end
