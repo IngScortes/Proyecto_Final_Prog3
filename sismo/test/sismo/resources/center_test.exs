@@ -79,6 +79,15 @@ defmodule Sismo.Resources.CenterTest do
     assert {:ok, {:already_reserved, 30}} = Center.reserve(ctx.id, "R001", 30, "N001")
     assert length(Center.history(ctx.id)) == 4
   end
+    test "release devuelve lo reservado y es idempotente", ctx do
+    {:ok, _} = Center.register_resource(ctx.id, "R001", "agua", "agua", "litros", 50)
+    {:ok, %Movement{}} = Center.reserve(ctx.id, "R001", 30, "N001:1")
+
+    assert {:ok, %Movement{kind: :liberacion, quantity: 30}} = Center.release(ctx.id, "R001", "N001:1")
+    assert {:ok, %{available: 50}} = Center.get_resource(ctx.id, "R001")
+    assert {:ok, :nothing_reserved} = Center.release(ctx.id, "R001", "N001:1")
+    assert {:ok, %Movement{}} = Center.reserve(ctx.id, "R001", 50, "N002:1")
+  end
 
   defp eventually(fun, tries \\ 50) do
     cond do

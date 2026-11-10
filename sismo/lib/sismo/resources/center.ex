@@ -27,6 +27,7 @@ defmodule Sismo.Resources.Center do
   def deposit(id, code, qty, ref \\ nil), do: move(id, :entrada, code, qty, ref)
   def withdraw(id, code, qty, ref \\ nil), do: move(id, :salida, code, qty, ref)
   def reserve(id, code, qty, need_id), do: move(id, :reserva, code, qty, need_id)
+  def release(id, code, need_ref), do: call(id, {:release, code, need_ref})
 
   def move(id, kind, code, qty, ref), do: call(id, {:move, kind, code, qty, ref})
 
@@ -66,6 +67,13 @@ defmodule Sismo.Resources.Center do
   def handle_call({:move, kind, code, qty, ref}, _from, state) do
     decision = Ledger.decide(state.ledger, kind, code, qty, ref)
     commit(state, decision, fn _ledger, mov -> mov end)
+  end
+
+    def handle_call({:release, code, ref}, _from, state) do
+    case Ledger.release(state.ledger, code, ref) do
+      {:ok, mov} -> commit(state, {:ok, mov}, fn _ledger, m -> m end)
+      :none -> {:reply, {:ok, :nothing_reserved}, state}
+    end
   end
 
   def handle_call({:get_resource, code}, _from, state) do

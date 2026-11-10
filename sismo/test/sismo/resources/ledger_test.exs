@@ -49,4 +49,21 @@ defmodule Sismo.Resources.LedgerTest do
     assert rebuilt.resources == l.resources
     assert rebuilt.reservations == l.reservations
   end
+    test "release devuelve la reserva al stock y replay lo reconstruye" do
+    l = ledger_with_stock(50)
+    {:ok, m} = Ledger.decide(l, :reserva, "R001", 30, "N001:1")
+    l = Ledger.apply_movement(l, m)
+    assert l.resources["R001"].available == 20
+
+    {:ok, r} = Ledger.release(l, "R001", "N001:1")
+    l = Ledger.apply_movement(l, r)
+
+    assert l.resources["R001"].available == 50
+    assert l.reservations == %{}
+    assert :none = Ledger.release(l, "R001", "N001:1")
+
+    rebuilt = Ledger.replay(Ledger.new("c1", "centro"), Enum.reverse(l.history))
+    assert rebuilt.resources == l.resources
+    assert rebuilt.reservations == %{}
+  end
 end

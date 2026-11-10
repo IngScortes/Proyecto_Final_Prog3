@@ -33,6 +33,11 @@ defmodule Sismo.Resources.Ledger do
     record(%{l | resources: Map.put(l.resources, m.code, resource)}, m)
   end
 
+    def apply_movement(l, %Movement{kind: :liberacion} = m) do
+    l = adjust(l, m.code, m.quantity)
+    record(%{l | reservations: Map.delete(l.reservations, {m.code, m.ref})}, m)
+  end
+
   def apply_movement(l, %Movement{kind: kind} = m) when kind in @credit_kinds,
     do: record(adjust(l, m.code, m.quantity), m)
 
@@ -82,6 +87,13 @@ defmodule Sismo.Resources.Ledger do
          {:ok, resource} <- fetch_resource(l, code),
          :ok <- check_stock(kind, resource, qty) do
       {:ok, movement(l, kind, code, qty, ref, [])}
+    end
+  end
+    @doc "Devuelve `{:ok, movimiento}` si hay una reserva con esa referencia, o `:none`."
+  def release(%__MODULE__{} = l, code, ref) do
+    case Map.fetch(l.reservations, {code, ref}) do
+      {:ok, qty} -> {:ok, movement(l, :liberacion, code, qty, ref, [])}
+      :error -> :none
     end
   end
 
