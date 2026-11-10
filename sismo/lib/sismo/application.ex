@@ -32,7 +32,8 @@ defmodule Sismo.Application do
       {Sismo.Activity.Log, data_dir: data_dir},
       {Task.Supervisor, name: Sismo.TaskSupervisor},
       Sismo.Resources.CenterSupervisor,
-      {Sismo.Users.Server, data_dir: data_dir}
+      {Sismo.Users.Server, data_dir: data_dir},
+      {Sismo.Zones.Server, data_dir: data_dir}
     ]
 
     with {:ok, sup} <-
