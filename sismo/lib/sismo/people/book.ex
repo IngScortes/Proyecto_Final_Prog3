@@ -73,6 +73,12 @@ defmodule Sismo.People.Book do
     zero = Map.new(@statuses, &{&1, 0})
     Enum.reduce(book.persons, zero, fn {_doc, p}, acc -> Map.update!(acc, p.status, &(&1 + 1)) end)
   end
+  
+    def message_counts(%__MODULE__{} = book) do
+    Enum.reduce(book.messages, %{pendiente: 0, entregado: 0}, fn {_id, m}, acc ->
+      Map.update!(acc, m.status, &(&1 + 1))
+    end)
+  end
 
   defp build_predicates([], acc), do: {:ok, acc}
 

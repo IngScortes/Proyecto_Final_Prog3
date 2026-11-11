@@ -55,7 +55,11 @@ defmodule Sismo.Shelters.ShelterSupervisor do
   @doc "Códigos de los albergues vivos, ordenados."
   def codes do
     Sismo.Registry
-    |> Registry.select([{{{:shelter, :"$1"}, :_, :_}, [], [:"$1"]}])
+    |> Registry.select([{{:"$1", :_, :_}, [], [:"$1"]}])
+    |> Enum.flat_map(fn
+      {:shelter, code} -> [code]
+      _other -> []
+    end)
     |> Enum.sort()
   end
 

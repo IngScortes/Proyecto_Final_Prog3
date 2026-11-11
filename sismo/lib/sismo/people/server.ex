@@ -32,6 +32,7 @@ defmodule Sismo.People.Server do
   def search(filters \\ [], server \\ __MODULE__), do: GenServer.call(server, {:search, filters})
   def history(document, server \\ __MODULE__), do: GenServer.call(server, {:history, document})
   def counts(server \\ __MODULE__), do: GenServer.call(server, :counts)
+  def message_counts(server \\ __MODULE__), do: GenServer.call(server, :message_counts)
 
   def send_message(from, to_document, content, server \\ __MODULE__),
     do: GenServer.call(server, {:send_message, from, to_document, content})
@@ -114,6 +115,8 @@ defmodule Sismo.People.Server do
     do: {:reply, Book.messages_for(state.book, document), state}
 
   def handle_call(:counts, _from, state), do: {:reply, Book.counts(state.book), state}
+  
+  def handle_call(:message_counts, _from, state), do: {:reply, Book.message_counts(state.book), state}
 
   def handle_call({:watch, document, pid}, _from, state) do
     case String.trim(to_string(document)) do
