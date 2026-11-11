@@ -15,7 +15,8 @@ defmodule Sismo.Application do
       Sismo.Shelters.ShelterSupervisor,
       {Sismo.Users.Server, data_dir: data_dir},
       {Sismo.Zones.Server, data_dir: data_dir},
-      {Sismo.Needs.Server, data_dir: data_dir}
+      {Sismo.Needs.Server, data_dir: data_dir},
+      {Sismo.People.Server, data_dir: data_dir}
     ]
 
     with {:ok, sup} <-
