@@ -1,4 +1,3 @@
-# lib/sismo/application.ex
 defmodule Sismo.Application do
   use Application
 
@@ -16,7 +15,8 @@ defmodule Sismo.Application do
       {Sismo.Users.Server, data_dir: data_dir},
       {Sismo.Zones.Server, data_dir: data_dir},
       {Sismo.Needs.Server, data_dir: data_dir},
-      {Sismo.People.Server, data_dir: data_dir}
+      {Sismo.People.Server, data_dir: data_dir},
+      {Sismo.Pets.Server, data_dir: data_dir}
     ]
 
     with {:ok, sup} <-
@@ -25,6 +25,7 @@ defmodule Sismo.Application do
       Sismo.Shelters.ShelterSupervisor.restore_all(data_dir)
       Sismo.Needs.Server.reconcile_links()
       Sismo.Shelters.ShelterSupervisor.reconcile_links()
+      Sismo.Pets.Server.reconcile_links()
       {:ok, sup}
     end
   end
