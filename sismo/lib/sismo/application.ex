@@ -12,6 +12,7 @@ defmodule Sismo.Application do
       {Sismo.Activity.Log, data_dir: data_dir},
       {Task.Supervisor, name: Sismo.TaskSupervisor},
       Sismo.Resources.CenterSupervisor,
+      Sismo.Shelters.ShelterSupervisor,
       {Sismo.Users.Server, data_dir: data_dir},
       {Sismo.Zones.Server, data_dir: data_dir},
       {Sismo.Needs.Server, data_dir: data_dir}
@@ -20,7 +21,9 @@ defmodule Sismo.Application do
     with {:ok, sup} <-
            Supervisor.start_link(children, strategy: :rest_for_one, name: Sismo.Supervisor) do
       Sismo.Resources.CenterSupervisor.restore_all(data_dir)
+      Sismo.Shelters.ShelterSupervisor.restore_all(data_dir)
       Sismo.Needs.Server.reconcile_links()
+      Sismo.Shelters.ShelterSupervisor.reconcile_links()
       {:ok, sup}
     end
   end

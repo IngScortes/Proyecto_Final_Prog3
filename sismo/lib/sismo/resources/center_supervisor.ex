@@ -23,16 +23,21 @@ defmodule Sismo.Resources.CenterSupervisor do
     end
   end
 
-  @doc "Levanta los centros que ya tienen archivo en disco (se llama al arrancar la aplicación)."
+    @doc "Levanta los centros que ya tienen archivo en disco (se llama al arrancar la aplicación)."
   def restore_all(data_dir \\ default_dir(), supervisor \\ __MODULE__) do
-    data_dir
-    |> Path.join("centers")
-    |> Path.join("*.log")
-    |> Path.wildcard()
-    |> Enum.map(&Path.basename(&1, ".log"))
-    |> Enum.map(fn id -> {id, start_center(supervisor, id: id, data_dir: data_dir)} end)
-  end
+    case File.ls(Path.join(data_dir, "centers")) do
+      {:ok, files} ->
+        files
+        |> Enum.filter(&String.ends_with?(&1, ".log"))
+        |> Enum.sort()
+        |> Enum.map(&Path.rootname(&1, ".log"))
+        |> Enum.map(fn id -> {id, start_center(supervisor, id: id, data_dir: data_dir)} end)
 
+      {:error, _} ->
+        []
+    end
+  end
+  
   defp start_center(supervisor, child_opts) do
     case DynamicSupervisor.start_child(supervisor, {Center, child_opts}) do
       {:ok, pid} -> {:ok, pid}
